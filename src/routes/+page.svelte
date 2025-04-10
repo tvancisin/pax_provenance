@@ -3,78 +3,151 @@
 
 	let width, height;
 	const data = {
-		name: 'Collect',
-		children: [
-			{
-				name: 'Translate',
-				children: [
-					{
-						name: 'Transcribe',
-						children: [
-							{
-								name: 'Code',
-								children: [
-									{
-										name: 'PA-X',
-										children: [
-											{
-												name: 'PA-X Gender',
-												children: [{ name: 'Scrollytelling', type: 'vis' }, { name: 'PeaceFem' }]
-											},
-											{ name: 'Messy Timeline', type: 'vis' },
-											{ name: 'Time & Space', type: 'vis' },
-											{ name: 'Sequence Comparison', type: 'vis' },
-											{ name: 'Data Overview', type: 'vis' },
-											{ name: 'PA-X Tracker', type: 'vis' },
-											{ name: 'Infographics', type: 'vis' },
-											{ name: 'PA-X Local', children: [{ name: 'Map', type: 'vis' }] },
-											{ name: 'Children & Youth', children: [{ name: 'PowerBi', type: 'vis' }] },
-											{
-												name: 'PAA-X',
-												children: [
-													{ name: 'Tracker', type: 'vis' },
-													{ name: 'Actors-Processes', type: 'vis' },
-													{ name: 'Third Parties', type: 'vis' },
-													{ name: 'Network', type: 'vis' }
-												]
-											}
-										]
-									}
-								]
-							}
-						]
-					}
-				]
-			}
-		],
-		downward: [
-			{ name: 'branch A' },
-			{ name: 'branch B' },
-			{ name: 'branch C' },
-			{ name: 'branch D' },
-			{ name: 'branch E' },
-			{ name: 'branch F' },
-			{ name: 'branch G' },
-			{ name: 'branch H' },
-			{ name: 'branch I' },
-			{ name: 'branch J' },
-			{ name: 'branch K' },
-			{ name: 'branch L' },
-			{ name: 'branch M' },
-			{ name: 'branch N' },
-			{ name: 'branch O' },
-			{ name: 'branch P' },
-			{ name: 'branch R' },
-			{ name: 'branch S' }
-		]
-	};
+	name: 'Collect',
+	children: [
+		{
+			name: 'Translate',
+			children: [
+				{
+					name: 'Transcribe',
+					children: [
+						{
+							name: 'Code',
+							children: [
+								{
+									name: 'PA-X',
+									children: [
+										{
+											name: 'Code',
+											children: [
+												{
+													name: 'PA-X Gender',
+													children: [
+														{
+															name: 'd3',
+															children: [{ name: 'Scrollytelling', type: 'vis' }]
+														},
+														{ name: 'PeaceFem' }
+													]
+												}
+											]
+										},
+										{
+											name: 'd3',
+											children: [{ name: 'Messy Timeline', type: 'vis' }]
+										},
+										{
+											name: 'd3',
+											children: [{ name: 'Time & Space', type: 'vis' }]
+										},
+										{
+											name: 'd3',
+											children: [{ name: 'Sequence Comparison', type: 'vis' }]
+										},
+										{
+											name: 'd3',
+											children: [{ name: 'Data Overview', type: 'vis' }]
+										},
+										{
+											name: 'PBi',
+											children: [{ name: 'PA-X Tracker', type: 'vis' }]
+										},
+										{
+											name: 'd3',
+											children: [{ name: 'Infographics', type: 'vis' }]
+										},
+										{
+											name: 'Code',
+											children: [
+												{
+													name: 'PA-X Local',
+													children: [
+														{
+															name: 'd3',
+															children: [{ name: 'Map', type: 'vis' }]
+														}
+													]
+												}
+											]
+										},
+										{
+											name: 'Code',
+											children: [
+												{
+													name: 'Children & Youth',
+													children: [
+														{
+															name: 'd3',
+															children: [{ name: 'PowerBi', type: 'vis' }]
+														}
+													]
+												}
+											]
+										},
+										{
+											name: 'Code',
+											children: [
+												{
+													name: 'PAA-X',
+													children: [
+														{
+															name: 'PBi',
+															children: [{ name: 'Tracker', type: 'vis' }]
+														},
+														{
+															name: 'd3',
+															children: [{ name: 'Actors-Processes', type: 'vis' }]
+														},
+														{
+															name: 'd3',
+															children: [{ name: 'Third Parties', type: 'vis' }]
+														},
+														{
+															name: 'd3',
+															children: [{ name: 'Network', type: 'vis' }]
+														}
+													]
+												}
+											]
+										}
+									]
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	],
+	downward: [
+		{ name: 'branch A', children: [{ name: 'conflict' }] },
+		{ name: 'branch B', children: [{ name: 'conflict' }] },
+		{ name: 'branch C', children: [{ name: 'conflict' }] },
+		{ name: 'branch D', children: [{ name: 'conflict' }] },
+		{ name: 'branch E', children: [{ name: 'conflict' }] },
+		{ name: 'branch F', children: [{ name: 'conflict' }] },
+		{ name: 'branch G', children: [{ name: 'conflict' }] },
+		{ name: 'branch H', children: [{ name: 'conflict' }] },
+		{ name: 'branch I', children: [{ name: 'conflict' }] },
+		{ name: 'branch J', children: [{ name: 'conflict' }] },
+		{ name: 'branch K', children: [{ name: 'conflict' }] },
+		{ name: 'branch L', children: [{ name: 'conflict' }] },
+		{ name: 'branch M', children: [{ name: 'conflict' }] },
+		{ name: 'branch N', children: [{ name: 'conflict' }] },
+		{ name: 'branch O', children: [{ name: 'conflict' }] },
+		{ name: 'branch P', children: [{ name: 'conflict' }] },
+		{ name: 'branch R', children: [{ name: 'conflict' }] },
+		{ name: 'branch S', children: [{ name: 'conflict' }] }
+	]
+};
+
 
 	let margin = 60;
 
 	$: innerWidth = width * 0.8;
 	$: innerHeight = height - 2 * margin;
 
-	$: yCenter = margin + innerHeight * 0.85;
+	$: yCenter = margin + innerHeight * 0.8;
 	$: upHeight = yCenter - margin;
 	$: downHeight = innerHeight - upHeight;
 	$: xCenter = margin + innerWidth / 2;
@@ -101,52 +174,54 @@
 		centerTree(rootUp, xCenter);
 		centerTree(rootDown, xCenter);
 
-		rootUp.each((d) => {
-			if (d.data.name === 'Translate') {
-				d.y -= 40; // Bring transcribe node closer to collect
-			}
-			if (d.data.name === 'Transcribe') {
-				d.y -= 80; // Bring transcribe node closer to collect
-			}
-			if (d.data.name === 'Code') {
-				d.y -= 120; // Bring transcribe node closer to collect
-			}
-			if (d.data.name === 'PA-X') {
-				d.y -= 160; // Bring pax node closer to transcribe
-			}
-			if (
-				d.data.name === 'PAA-X' ||
-				d.data.name === 'PA-X Gender' ||
-				d.data.name === 'PA-X Local' ||
-				d.data.name === 'Children & Youth'
-			) {
-				d.y -= 50; // Bring paax node closer to transcribe
-			}
-		});
+		// rootUp.each((d) => {
+		// 	if (d.data.name === 'Translate') {
+		// 		d.y -= 25; // Bring transcribe node closer to collect
+		// 	}
+		// 	if (d.data.name === 'Transcribe') {
+		// 		d.y -= 45; // Bring transcribe node closer to collect
+		// 	}
+		// 	if (d.data.name === 'Code') {
+		// 		d.y -= 70; // Bring transcribe node closer to collect
+		// 	}
+		// 	if (d.data.name === 'PA-X') {
+		// 		d.y -= 100; // Bring pax node closer to transcribe
+		// 	}
+		// 	if (
+		// 		d.data.name === 'PAA-X' ||
+		// 		d.data.name === 'PA-X Gender' ||
+		// 		d.data.name === 'PA-X Local' ||
+		// 		d.data.name === 'Children & Youth'
+		// 	) {
+		// 		d.y -= 50; // Bring paax node closer to transcribe
+		// 	}
+		// });
 
 		// Find the "PAA-X" node and apply arch positioning to its children
 		const paxNode = rootUp.descendants().find((d) => d.data.name === 'PA-X');
 		// const paaxNode = rootUp.descendants().find((d) => d.data.name === 'PAA-X');
 		// const genderNode = rootUp.descendants().find((d) => d.data.name === 'PA-X Gender');
 
-		if (paxNode) {
-			const levelY =
-				paxNode.children?.find((d) => d.data.name === 'PA-X Gender')?.y ?? paxNode.y + 50;
-			const targetNames = [
-				'Messy Timeline',
-				'Time & Space',
-				'Sequence Comparison',
-				'Data Overview',
-				'PA-X Tracker',
-				'Infographics'
-			];
+		// if (paxNode) {
+		// 	const levelY =
+		// 		paxNode.children?.find((d) => d.data.name === 'PA-X Gender')?.y ?? paxNode.y + 50;
+		// 		console.log(levelY);
+				
+		// 	const targetNames = [
+		// 		'd3', 'PBi'
+		// 		// 'Time & Space',
+		// 		// 'Sequence Comparison',
+		// 		// 'Data Overview',
+		// 		// 'PA-X Tracker',
+		// 		// 'Infographics'
+		// 	];
 
-			paxNode.children?.forEach((child) => {
-				if (targetNames.includes(child.data.name)) {
-					child.y = levelY;
-				}
-			});
-		}
+		// 	paxNode.children?.forEach((child) => {
+		// 		if (targetNames.includes(child.data.name)) {
+		// 			child.y = levelY;
+		// 		}
+		// 	});
+		// }
 
 		// if (paaxNode) {
 		// 	const children = paaxNode.children || [];
@@ -178,25 +253,29 @@
 		// 	});
 		// }
 
+		rootDown.each((d) => {
+			if (d.data.name === 'conflict') {
+				d.y -= 30; // You can adjust this value to control vertical gap
+			}
+		});
+
 		nodesUp = rootUp.descendants();
 		linksUp = nodesUp.slice(1);
 		nodesDown = rootDown.descendants().slice(1); // remove duplicate root
 		linksDown = nodesDown.filter((d) => d.parent); // just in case
 	}
-	// $: console.log(linksUp);
 </script>
 
 <div id="wrapper" bind:clientWidth={width} bind:clientHeight={height}>
 	{#if width !== undefined || height !== undefined}
 		<svg {width} {height}>
-			<g transform={`translate(${0}, ${margin / 2})`}>
+			<g transform={`translate(${0}, ${margin})`}>
 				<!-- Upward Links -->
 				{#each linksUp as d}
-					<path
+					<!-- <path
 						d={`M${d.x},${yCenter - d.y}
-					C${d.x},${yCenter - d.parent.y - 50}
-					${d.parent.x},${yCenter - d.parent.y - 50}
-					${d.parent.x},${yCenter - d.parent.y}`}
+					L${d.x},${yCenter - d.parent.y}
+					L${d.parent.x},${yCenter - d.parent.y}`}
 						fill="none"
 						stroke={d.children &&
 						['PAA-X', 'PA-X Gender', 'PA-X Local', 'Children & Youth'].includes(d.data.name)
@@ -208,22 +287,53 @@
 						d.data.name === 'Transcribe' ||
 						d.data.name === 'Code' ||
 						d.data.name === 'Translate'
-							? 5
+							? 10
 							: d.data.name === 'PAA-X'
 								? 3
 								: d.data.name === 'PA-X Gender'
+									? 3
+									: 3}
+					/> -->
+
+					<path
+						d={`M${d.x},${yCenter - d.y}
+				C${d.x},${yCenter - d.parent.y - 30}
+				${d.parent.x},${yCenter - d.parent.y - 70}
+				${d.parent.x},${yCenter - d.parent.y}`}
+						fill="none"
+						stroke={d.children &&
+						['PAA-X', 'PA-X Gender', 'PA-X Local', 'Children & Youth'].includes(d.data.name)
+							? 'white'
+							: d.children
+								? 'gray'
+								: 'orange'}
+						stroke-width={d.data.name === 'PA-X' ||
+						d.data.name === 'Transcribe' ||
+						d.data.name === 'Code' ||
+						d.data.name === 'Translate'
+							? 2
+							: d.data.name === 'PAA-X'
+								? 2
+								: d.data.name === 'PA-X Gender'
 									? 2
-									: 1}
+									: 2}
 					/>
 				{/each}
 
 				<!-- Downward Links -->
 				{#each linksDown as d}
+					<!-- <path
+						d={`M${d.x},${yCenter + d.y}
+					L${d.x},${yCenter + d.parent.y}
+					L${d.parent.x},${yCenter + d.parent.y}`}
+						fill="none"
+						stroke="steelblue"
+					/> -->
 					<path
 						d={`M${d.x},${yCenter + d.y}
-					C${d.x},${yCenter + d.parent.y + 50}
-					${d.parent.x},${yCenter + d.parent.y + 50}
-					${d.parent.x},${yCenter + d.parent.y}`}
+				C${d.x},${yCenter + d.parent.y}
+				${d.parent.x},${yCenter + d.parent.y + 60}
+				${d.parent.x},${yCenter + d.parent.y}`}
 						fill="none"
 						stroke="steelblue"
 					/>
@@ -346,19 +456,35 @@
 				<!-- Downward Nodes -->
 				{#each nodesDown as d}
 					<g transform={`translate(${d.x}, ${yCenter + d.y})`}>
-						<foreignObject x="-8" y="-8" width="16" height="16">
-							<div
-								xmlns="http://www.w3.org/1999/xhtml"
-								style="
-										width: 16px;
-										height: 16px;
+						{#if d.data.name == 'conflict'}
+							<foreignObject x="-8" y="-8" width="18" height="18">
+								<div
+									xmlns="http://www.w3.org/1999/xhtml"
+									style="
+										width: 18px;
+										height: 18px;
+										background-image: url('war.png');
+										background-size: cover;
+										border-radius: 4px;
+									"
+								></div>
+							</foreignObject>
+							<text x="13" y="5" font-size="12" fill="red"> {'war'}</text>
+						{:else}
+							<foreignObject x="-8" y="-8" width="18" height="18">
+								<div
+									xmlns="http://www.w3.org/1999/xhtml"
+									style="
+										width: 18px;
+										height: 18px;
 										background-image: url('agt.png');
 										background-size: cover;
 										border-radius: 4px;
 									"
-							></div>
-						</foreignObject>
-						<text x="13" y="5" font-size="12" fill="steelblue"> {'agt'}</text>
+								></div>
+							</foreignObject>
+							<text x="13" y="5" font-size="12" fill="steelblue"> {'agt'}</text>
+						{/if}
 					</g>
 				{/each}
 
@@ -369,11 +495,35 @@
 			</g>
 		</svg>
 	{/if}
+	<div style="text-align: center;">
+		<p>How to interact with links and nodes?</p>
+		<p>What filtering to apply?</p>
+		<p>How to restructure the tree for different queries?</p>
+		<p>Which part to quantify and which to qualify?</p>
+		<p>How do the same icons differ and how to show?</p>
+		<p>What to highlight before user goes to individual vis?</p>
+		<!-- <iframe
+			title="Miro Board"
+			src="https://miro.com/app/live-embed/uXjVIYrT328=/?moveToViewport=-208202,-17495,146090,66767&embedId=356675018147"
+			frameborder="0"
+			scrolling="no"
+			allow="fullscreen; clipboard-read; clipboard-write"
+			allowfullscreen
+		></iframe> -->
+	</div>
 </div>
 
 <style>
 	#wrapper {
 		width: 100%;
 		height: 100vh;
+	}
+	iframe {
+		width: 90%;
+		height: 100vh;
+		border: none;
+	}
+	p {
+		color: white;
 	}
 </style>
