@@ -40,7 +40,7 @@
 														name: 'Children & Youth',
 														children: [
 															{
-																name: 'd3',
+																name: 'PBi',
 																children: [{ name: 'PowerBi', type: 'vis' }]
 															}
 														]
@@ -151,27 +151,28 @@
 		}
 	}
 
-	$: assignIds(data);
+	assignIds(data);
+	data.downward.forEach(assignIds);
 
 	console.log(data);
 
 	let margin = 60;
 
-	$: innerWidth = width * 0.8;
+	$: innerWidth = width * 0.9;
 	$: innerHeight = height - 2 * margin;
 
 	$: yCenter = margin + innerHeight * 0.8;
 	$: upHeight = yCenter - margin;
 	$: downHeight = innerHeight - upHeight;
-	$: xCenter = margin + innerWidth / 2;
+	$: xCenter = innerWidth / 2;
 
 	let nodesUp = [],
 		linksUp = [];
 	let nodesDown = [],
 		linksDown = [];
 
-	$: upwardCluster = d3.cluster().size([innerWidth, upHeight]);
-	$: downwardCluster = d3.cluster().size([innerWidth, downHeight]);
+	$: upwardCluster = d3.cluster().size([innerWidth - margin, upHeight]);
+	$: downwardCluster = d3.cluster().size([innerWidth - margin, downHeight]);
 
 	$: rootUp = d3.hierarchy(data, (d) => d.children);
 	$: rootDown = d3.hierarchy({ ...data, children: data.downward }, (d) => d.children);
@@ -234,16 +235,22 @@
 		}
 
 		const links = new Set();
+
+		// 1. Highlight upward ancestry
 		while (node.parent) {
 			const key = `${node.parent.data.id}→${node.data.id}`;
 			links.add(key);
 			node = node.parent;
 		}
+
+		// 2. Always add all downward links
+		linksDown.forEach((d) => {
+			const key = `${d.parent.data.id}→${d.data.id}`;
+			links.add(key);
+		});
+
 		highlightedLinks = links;
 	}
-
-	$: console.log(highlightedLinks);
-	
 </script>
 
 <div id="wrapper" bind:clientWidth={width} bind:clientHeight={height}>
@@ -277,12 +284,12 @@
 
 					<path
 						d={`M${d.x},${yCenter - d.y}
-				C${d.x},${yCenter - d.parent.y - 30}
-				${d.parent.x},${yCenter - d.parent.y - 70}
-				${d.parent.x},${yCenter - d.parent.y}`}
+						C${d.x},${yCenter - d.parent.y - 30}
+						${d.parent.x},${yCenter - d.parent.y - 70}
+						${d.parent.x},${yCenter - d.parent.y}`}
 						fill="none"
-						stroke={highlightedLinks.has(`${d.parent.data.id}→${d.data.id}`) ? 'white' : 'gray'}
-						stroke-width={highlightedLinks.has(`${d.parent.data.id}→${d.data.id}`) ? 3 : 2}
+						stroke={highlightedLinks.has(`${d.parent.data.id}→${d.data.id}`) ? 'white' : !d.children ? 'orange': 'gray'}
+						stroke-width={highlightedLinks.has(`${d.parent.data.id}→${d.data.id}`) ? '3' : '2'}
 					/>
 				{/each}
 
@@ -298,33 +305,58 @@
 
 					<path
 						d={`M${d.x},${yCenter + d.y}
-				C${d.x},${yCenter + d.parent.y}
-				${d.parent.x},${yCenter + d.parent.y + 60}
-				${d.parent.x},${yCenter + d.parent.y}`}
+						C${d.x},${yCenter + d.parent.y}
+						${d.parent.x},${yCenter + d.parent.y + 60}
+						${d.parent.x},${yCenter + d.parent.y}`}
 						fill="none"
-						stroke={d.data.name === 'conflict' ? 'gray' : 'gray'}
+						stroke={highlightedLinks.has(`${d.parent.data.id}→${d.data.id}`) ? 'white' : 'gray'}
+						stroke-width="1"
 					/>
 				{/each}
 
 				<!-- Upward Nodes -->
 				{#each nodesUp as d}
 					<g transform={`translate(${d.x}, ${yCenter - d.y})`}>
-						{#if d.data.type === 'vis'}
-							<Icons {d} which_icon="vis.png" on:hover={handleHoverEvent} />
+						<text
+							x={d.children ? 15 : 5}
+							y={d.children ? 5 : -10}
+							font-size="12"
+							fill={d.children &&
+							['PAA-X', 'PA-X Gender', 'PA-X', 'PA-X Local', 'Children & Youth'].includes(
+								d.data.name
+							)
+								? 'gray'
+								: d.children
+									? 'gray'
+									: 'gray'}
+							transform={d.children ? 'rotate(0)' : 'rotate(-45)'}
+						>
+							{d.data.name}
+						</text>
+						{#if d.data.name === 'Scrollytelling'}
+							<Icons {d} which_icon="scrolly.png" on:hover={handleHoverEvent} />
+						{:else if d.data.name == 'PeaceFem'}
+							<Icons {d} which_icon="fem.png" on:hover={handleHoverEvent} />
+						{:else if d.data.name == 'PowerBi'}
+							<Icons {d} which_icon="children.png" on:hover={handleHoverEvent} />
+						{:else if d.data.name == 'Messy Timeline'}
+							<Icons {d} which_icon="mess.png" on:hover={handleHoverEvent} />
+						{:else if d.data.name == 'Time & Space'}
+							<Icons {d} which_icon="petal.png" on:hover={handleHoverEvent} />
 						{:else if d.data.name == 'PAA-X' || d.data.name == 'PA-X' || d.data.name == 'PA-X Local' || d.data.name == 'Children & Youth' || d.data.name == 'PA-X Gender'}
 							<Icons {d} which_icon="data.png" on:hover={handleHoverEvent} />
 						{:else if d.data.name == 'Collect'}
-							<Icons {d} which_icon={'collect.png'} />
+							<Icons {d} which_icon="collect.png" on:hover={handleHoverEvent} />
 						{:else if d.data.name == 'Translate'}
-							<Icons {d} which_icon={'translate.png'} />
+							<Icons {d} which_icon="translate.png" on:hover={handleHoverEvent} />
 						{:else if d.data.name == 'Transcribe'}
-							<Icons {d} which_icon={'transcribe.png'} />
+							<Icons {d} which_icon="transcribe.png" on:hover={handleHoverEvent} />
 						{:else if d.data.name == 'PBi'}
-							<Icons {d} which_icon={'pbi.png'} />
+							<Icons {d} which_icon="pbi.png" on:hover={handleHoverEvent} />
 						{:else if d.data.name == 'd3'}
-							<Icons {d} which_icon={'d3.png'} />
+							<Icons {d} which_icon="d3.png" on:hover={handleHoverEvent} />
 						{:else if d.data.name == 'Code'}
-							<Icons {d} which_icon={'annotation.png'} />
+							<Icons {d} which_icon="annotation.png" on:hover={handleHoverEvent} />
 						{:else}
 							<circle
 								r="5"
@@ -338,22 +370,6 @@
 										: 'gray'}
 							/>
 						{/if}
-						<text
-							x={d.children ? 15 : 5}
-							y={d.children ? 5 : -10}
-							font-size="12"
-							fill={d.children &&
-							['PAA-X', 'PA-X Gender', 'PA-X', 'PA-X Local', 'Children & Youth'].includes(
-								d.data.name
-							)
-								? 'white'
-								: d.children
-									? 'gray'
-									: 'orange'}
-							transform={d.children ? 'rotate(0)' : 'rotate(-45)'}
-						>
-							{d.data.name}
-						</text>
 					</g>
 				{/each}
 
@@ -362,10 +378,10 @@
 					<g transform={`translate(${d.x}, ${yCenter + d.y})`}>
 						{#if d.data.name == 'conflict'}
 							<Icons {d} which_icon={'war.png'} />
-							<text x="13" y="5" font-size="12" fill="red"> {'war'}</text>
+							<text x="13" y="5" font-size="12" fill="gray"> {'war'}</text>
 						{:else}
 							<Icons {d} which_icon={'agt.png'} />
-							<text x="13" y="5" font-size="12" fill="steelblue"> {'agt'}</text>
+							<text x="13" y="5" font-size="12" fill="gray"> {'agt'}</text>
 						{/if}
 					</g>
 				{/each}

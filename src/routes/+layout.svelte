@@ -3,9 +3,9 @@
     export let children;
 </script>
 
-<nav>
+<!-- <nav>
     <a href="/">Home</a>
     <a href="/about">About</a>
-</nav>
+</nav> -->
 
 {@render children()}
