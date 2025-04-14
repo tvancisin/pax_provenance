@@ -8,31 +8,49 @@
 		details_data = [];
 	const data = {
 		name: 'Collect',
+		ppl: 2,
+		time: '20',
 		children: [
 			{
 				name: 'Translate',
+				ppl: 5,
+				time: '10',
 				children: [
 					{
 						name: 'Transcribe',
+						ppl: 10,
+						time: '40',
 						children: [
 							{
 								name: 'Code',
+								ppl: 3,
+								time: '100',
 								children: [
 									{
 										name: 'PA-X',
 										type: 'db',
+										ppl: 5,
+										time: '100',
 										children: [
 											{
 												name: 'Code',
+												ppl: 3,
+												time: '50',
 												children: [
 													{
 														name: 'PA-X Gender',
 														type: 'db',
+														ppl: 3,
+														time: '10',
 														children: [
 															{
 																name: 'd3',
 																type: 'prog',
-																children: [{ name: 'Scrollytelling', type: 'vis' }]
+																ppl: 1,
+																time: '3',
+																children: [
+																	{ name: 'Scrollytelling', type: 'vis', ppl: 4, time: '2' }
+																]
 															},
 															{ name: 'PeaceFem' }
 														]
@@ -142,24 +160,20 @@
 			}
 		],
 		downward: [
-			{ name: 'branch A', children: [{ name: 'conflict' }] },
-			{ name: 'branch B', children: [{ name: 'conflict' }] },
-			{ name: 'branch C', children: [{ name: 'conflict' }] },
-			{ name: 'branch D', children: [{ name: 'conflict' }] },
-			{ name: 'branch E', children: [{ name: 'conflict' }] },
-			{ name: 'branch F', children: [{ name: 'conflict' }] },
-			{ name: 'branch G', children: [{ name: 'conflict' }] },
-			{ name: 'branch H', children: [{ name: 'conflict' }] },
-			{ name: 'branch I', children: [{ name: 'conflict' }] },
-			{ name: 'branch J', children: [{ name: 'conflict' }] },
-			{ name: 'branch K', children: [{ name: 'conflict' }] },
-			{ name: 'branch L', children: [{ name: 'conflict' }] },
-			{ name: 'branch M', children: [{ name: 'conflict' }] },
-			{ name: 'branch N', children: [{ name: 'conflict' }] },
-			{ name: 'branch O', children: [{ name: 'conflict' }] },
-			{ name: 'branch P', children: [{ name: 'conflict' }] },
-			{ name: 'branch R', children: [{ name: 'conflict' }] },
-			{ name: 'branch S', children: [{ name: 'conflict' }] }
+			{ name: 'agt', children: [{ name: 'conflict' }] },
+			{ name: 'agt', children: [{ name: 'conflict' }] },
+			{ name: 'agt', children: [{ name: 'conflict' }] },
+			{ name: 'agt', children: [{ name: 'conflict' }] },
+			{ name: 'agt', children: [{ name: 'conflict' }] },
+			{ name: 'agt', children: [{ name: 'conflict' }] },
+			{ name: 'agt', children: [{ name: 'conflict' }] },
+			{ name: 'agt', children: [{ name: 'conflict' }] },
+			{ name: 'agt', children: [{ name: 'conflict' }] },
+			{ name: 'agt', children: [{ name: 'conflict' }] },
+			{ name: 'agt', children: [{ name: 'conflict' }] },
+			{ name: 'agt', children: [{ name: 'conflict' }] },
+			{ name: 'agt', children: [{ name: 'conflict' }] },
+			{ name: 'agt', children: [{ name: 'conflict' }] }
 		]
 	};
 
@@ -272,20 +286,32 @@
 	}
 
 	let fullChain = [];
+
 	function handleClickEvents(e) {
 		fullChain = [];
 		width = width / 2;
 		details_width = width;
 		details_data = e.detail.node;
-		console.log(details_data);
-
 		let current = details_data;
+		let downCurrent = nodesDown[16];
+		let downCurrentChain = []; // Temporary array to store downCurrent hierarchy
 
-		// Walk up to collect all parents
+		// Walk up to collect all parents from details_data
 		while (current) {
 			fullChain.push(current); // push keeps order as leaf → root
 			current = current.parent;
 		}
+
+		// Walk up to collect all parents from downCurrent, except the last one
+		while (downCurrent && downCurrent.parent !== null) {
+			downCurrentChain.push(downCurrent); // Collect downCurrent nodes in order
+			downCurrent = downCurrent.parent;
+		}
+
+		// Push the downCurrent chain in reverse order
+		fullChain = fullChain.concat(downCurrentChain.reverse());
+
+		console.log(fullChain); // Log the full chain after merging
 	}
 
 	function reset() {
@@ -293,6 +319,8 @@
 		details_width = 1;
 		fullChain = [];
 	}
+
+	$: time_line = d3.scaleLinear().domain([0, 100]).range([0, width/2]);
 </script>
 
 <div id="wrapper" bind:clientWidth={width} bind:clientHeight={height}>
@@ -371,11 +399,7 @@
 							x={d.children ? 15 : 5}
 							y={d.children ? 5 : -10}
 							font-size="12"
-							fill={d.children && d.data.type == 'db'
-								? 'gray'
-								: d.children
-									? 'gray'
-									: 'gray'}
+							fill={d.children && d.data.type == 'db' ? 'gray' : d.children ? 'gray' : 'gray'}
 							transform={d.children ? 'rotate(0)' : 'rotate(-35)'}
 						>
 							{d.data.name}
@@ -430,10 +454,7 @@
 								on:click={handleClickEvents}
 							/>
 						{:else}
-							<circle
-								r="5"
-								fill="gray"
-							/>
+							<circle r="5" fill="gray" />
 						{/if}
 					</g>
 				{/each}
@@ -458,9 +479,80 @@
 			{#each fullChain as d, i}
 				<g transform={`translate(${10}, ${(height / (fullChain.length + 1)) * (i + 1)})`}>
 					<!-- Calculate y position by dividing total height evenly -->
-					<text fill="white">
-						{d.data.name}
-					</text>
+					<!-- <text x="20" y="5" fill="white" font-size="12">
+						{'no. of ppl, time taken, publications, href'}
+					</text> -->
+					<!-- Draw one rectangle per person -->
+					{#each Array(d.data.ppl) as _, j}
+						<circle cx={20 + j * 7} cy={0} r="3" fill="skyblue"></circle>
+					{/each}
+					<line x1="20" y1="25" x2={20 + time_line(d.data.time)} y2="25" stroke="white" stroke-width="1" />
+					{#if d.data.type === 'vis'}
+						<Icons
+							{d}
+							which_icon="vis.png"
+							on:hover={handleHoverEvent}
+							on:click={handleClickEvents}
+						/>
+					{:else if d.data.type == 'db'}
+						<Icons
+							{d}
+							which_icon="data.png"
+							on:hover={handleHoverEvent}
+							on:click={handleClickEvents}
+						/>
+					{:else if d.data.type == 'prog'}
+						<Icons
+							{d}
+							which_icon="prog.png"
+							on:hover={handleHoverEvent}
+							on:click={handleClickEvents}
+						/>
+					{:else if d.data.name == 'Collect'}
+						<Icons
+							{d}
+							which_icon="collect.png"
+							on:hover={handleHoverEvent}
+							on:click={handleClickEvents}
+						/>
+					{:else if d.data.name == 'Translate'}
+						<Icons
+							{d}
+							which_icon="translate.png"
+							on:hover={handleHoverEvent}
+							on:click={handleClickEvents}
+						/>
+					{:else if d.data.name == 'Transcribe'}
+						<Icons
+							{d}
+							which_icon="transcribe.png"
+							on:hover={handleHoverEvent}
+							on:click={handleClickEvents}
+						/>
+					{:else if d.data.name == 'Code'}
+						<Icons
+							{d}
+							which_icon="annotation.png"
+							on:hover={handleHoverEvent}
+							on:click={handleClickEvents}
+						/>
+					{:else if d.data.name == 'agt'}
+						<Icons
+							{d}
+							which_icon="agt.png"
+							on:hover={handleHoverEvent}
+							on:click={handleClickEvents}
+						/>
+					{:else if d.data.name == 'conflict'}
+						<Icons
+							{d}
+							which_icon="war.png"
+							on:hover={handleHoverEvent}
+							on:click={handleClickEvents}
+						/>
+					{:else}
+						<circle r="5" fill="gray" />
+					{/if}
 				</g>
 			{/each}
 		</svg>
