@@ -21,6 +21,7 @@
 		handle_mouse_enter(d);
 	}}
 	on:mouseleave={() => dispatch('hover', { node: null })}
+	on:click={() => dispatch('click', { node: d })}
 >
 	<div class="icon" style={`background-image: url('${which_icon}');`}></div>
 </foreignObject>
