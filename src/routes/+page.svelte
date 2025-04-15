@@ -5,7 +5,8 @@
 	let width,
 		height,
 		details_width = 1,
-		details_data = [];
+		details_data = [],
+		clicked = null;
 	const data = {
 		name: 'Collect',
 		ppl: 2,
@@ -177,8 +178,8 @@
 		]
 	};
 
+	// adding id's to each node
 	let idCounter = 0;
-
 	function assignIds(node) {
 		node.id = `node-${idCounter++}`;
 		if (node.children) {
@@ -189,15 +190,18 @@
 	assignIds(data);
 	data.downward.forEach(assignIds);
 
+	// dimensions
 	let margin = 60;
-
 	$: innerWidth = width * 0.9;
 	$: innerHeight = height - 2 * margin;
-
 	$: yCenter = margin + innerHeight * 0.8;
 	$: upHeight = yCenter - margin;
 	$: downHeight = innerHeight - upHeight;
 	$: xCenter = innerWidth / 2;
+	$: time_line = d3
+		.scaleLinear()
+		.domain([0, 100])
+		.range([0, innerWidth / 2]);
 
 	let nodesUp = [],
 		linksUp = [];
@@ -258,39 +262,46 @@
 		nodesDown = rootDown.descendants().slice(1); // remove duplicate root
 		linksDown = nodesDown.filter((d) => d.parent); // just in case
 	}
+
+	// mouseover
 	let highlightedLinks = new Set();
-
 	function handleHoverEvent(e) {
-		let node = e.detail.node;
-		if (!node) {
-			highlightedLinks = new Set();
-			return;
+		// console.log(e.detail.node);
+		if (!clicked) {
+			let node = e.detail.node;
+			if (!node) {
+				highlightedLinks = new Set();
+				return;
+			}
+
+			const links = new Set();
+
+			// 1. Highlight upward ancestry
+			while (node.parent) {
+				const key = `${node.parent.data.id}→${node.data.id}`;
+				links.add(key);
+				node = node.parent;
+			}
+
+			// 2. Always add all downward links
+			linksDown.forEach((d) => {
+				const key = `${d.parent.data.id}→${d.data.id}`;
+				links.add(key);
+			});
+
+			highlightedLinks = links;
 		}
-
-		const links = new Set();
-
-		// 1. Highlight upward ancestry
-		while (node.parent) {
-			const key = `${node.parent.data.id}→${node.data.id}`;
-			links.add(key);
-			node = node.parent;
-		}
-
-		// 2. Always add all downward links
-		linksDown.forEach((d) => {
-			const key = `${d.parent.data.id}→${d.data.id}`;
-			links.add(key);
-		});
-
-		highlightedLinks = links;
 	}
 
+	// click
 	let fullChain = [];
-
 	function handleClickEvents(e) {
+		if (clicked == null) {
+			innerWidth = innerWidth / 2;
+		}
+		clicked = true;
 		fullChain = [];
-		width = width / 2;
-		details_width = width;
+		details_width = innerWidth;
 		details_data = e.detail.node;
 		let current = details_data;
 		let downCurrent = nodesDown[16];
@@ -310,17 +321,15 @@
 
 		// Push the downCurrent chain in reverse order
 		fullChain = fullChain.concat(downCurrentChain.reverse());
-
-		console.log(fullChain); // Log the full chain after merging
 	}
 
 	function reset() {
-		width = width * 2;
+		innerWidth = width * 0.9;
 		details_width = 1;
 		fullChain = [];
+		clicked = null;
+		highlightedLinks = new Set();
 	}
-
-	$: time_line = d3.scaleLinear().domain([0, 100]).range([0, width/2]);
 </script>
 
 <div id="wrapper" bind:clientWidth={width} bind:clientHeight={height}>
@@ -367,7 +376,7 @@
 									: !d.children
 										? 'orange'
 										: 'gray'}
-						stroke-width={highlightedLinks.has(`${d.parent.data.id}→${d.data.id}`) ? '3' : '2'}
+						stroke-width={highlightedLinks.has(`${d.parent.data.id}→${d.data.id}`) ? '4' : '3'}
 					/>
 				{/each}
 
@@ -476,80 +485,55 @@
 	{/if}
 	<div id="details">
 		<svg width={details_width} {height}>
+			<line x1="10" y1={margin} x2="10" y2={height - margin} stroke="white" stroke-width="3" />
+
 			{#each fullChain as d, i}
 				<g transform={`translate(${10}, ${(height / (fullChain.length + 1)) * (i + 1)})`}>
 					<!-- Calculate y position by dividing total height evenly -->
-					<!-- <text x="20" y="5" fill="white" font-size="12">
-						{'no. of ppl, time taken, publications, href'}
+					<!-- <text x="50" y="5" fill="white" font-size="12">
+						{'remove/limit color. switch between two colors?'}
 					</text> -->
 					<!-- Draw one rectangle per person -->
 					{#each Array(d.data.ppl) as _, j}
-						<circle cx={20 + j * 7} cy={0} r="3" fill="skyblue"></circle>
+						<foreignObject
+							x={20 + j * 10}
+							y={-8 + Math.random()}
+							width="10"
+							height="10"
+							role="button"
+							tabindex="0"
+							aria-label="Icon"
+						>
+							<div class="icon" style={`background-image: url('person.png');`}></div>
+						</foreignObject>
 					{/each}
-					<line x1="20" y1="25" x2={20 + time_line(d.data.time)} y2="25" stroke="white" stroke-width="1" />
+					<line
+						x1="20"
+						y1="10"
+						x2={20 + time_line(d.data.time)}
+						y2="10"
+						stroke="gray"
+						stroke-width="1"
+					/>
+
 					{#if d.data.type === 'vis'}
-						<Icons
-							{d}
-							which_icon="vis.png"
-							on:hover={handleHoverEvent}
-							on:click={handleClickEvents}
-						/>
+						<Icons {d} which_icon="vis.png" />
 					{:else if d.data.type == 'db'}
-						<Icons
-							{d}
-							which_icon="data.png"
-							on:hover={handleHoverEvent}
-							on:click={handleClickEvents}
-						/>
+						<Icons {d} which_icon="data.png" />
 					{:else if d.data.type == 'prog'}
-						<Icons
-							{d}
-							which_icon="prog.png"
-							on:hover={handleHoverEvent}
-							on:click={handleClickEvents}
-						/>
+						<Icons {d} which_icon="prog.png" />
 					{:else if d.data.name == 'Collect'}
-						<Icons
-							{d}
-							which_icon="collect.png"
-							on:hover={handleHoverEvent}
-							on:click={handleClickEvents}
-						/>
+						<Icons {d} which_icon="collect.png" />
 					{:else if d.data.name == 'Translate'}
-						<Icons
-							{d}
-							which_icon="translate.png"
-							on:hover={handleHoverEvent}
-							on:click={handleClickEvents}
-						/>
+						<Icons {d} which_icon="translate.png" />
 					{:else if d.data.name == 'Transcribe'}
-						<Icons
-							{d}
-							which_icon="transcribe.png"
-							on:hover={handleHoverEvent}
-							on:click={handleClickEvents}
-						/>
+						<Icons {d} which_icon="transcribe.png" />
 					{:else if d.data.name == 'Code'}
-						<Icons
-							{d}
-							which_icon="annotation.png"
-							on:hover={handleHoverEvent}
-							on:click={handleClickEvents}
-						/>
+						<Icons {d} which_icon="annotation.png" />
 					{:else if d.data.name == 'agt'}
-						<Icons
-							{d}
-							which_icon="agt.png"
-							on:hover={handleHoverEvent}
-							on:click={handleClickEvents}
-						/>
+						<Icons {d} which_icon="agt.png" />
 					{:else if d.data.name == 'conflict'}
-						<Icons
-							{d}
-							which_icon="war.png"
-							on:hover={handleHoverEvent}
-							on:click={handleClickEvents}
-						/>
+						<Icons {d} which_icon="war.png" />
 					{:else}
 						<circle r="5" fill="gray" />
 					{/if}
@@ -600,5 +584,13 @@
 	}
 	p {
 		color: white;
+	}
+	.icon {
+		position: absolute;
+		width: 10px;
+		height: 10px;
+		background-size: cover;
+		border-radius: 4px;
+		transition: transform 0.2s ease;
 	}
 </style>

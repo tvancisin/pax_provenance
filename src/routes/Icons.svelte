@@ -38,7 +38,7 @@
 	foreignObject:hover .icon {
 		transform: scale(3);
 	}
-    foreignObject {
-        overflow: visible;
-    }
+	foreignObject {
+		overflow: visible;
+	}
 </style>
