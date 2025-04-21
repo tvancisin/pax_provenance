@@ -20,6 +20,7 @@ export let original_data = {
                             ppl: 3,
                             time: '100',
                             url: 'img/pax_code.png',
+                            type: 'first_code',
                             link: 'https://pax.peaceagreements.org/media/documents/PA_X_codebook_v8.pdf',
                             children: [
                                 {
@@ -34,6 +35,7 @@ export let original_data = {
                                             name: 'Code',
                                             ppl: 3,
                                             time: '50',
+                                            type: 'paax_code',
                                             url: 'img/gender_code.png',
                                             link: 'https://pax.peaceagreements.org/media/documents/PA_X_codebook_wgg_v8.pdf',
                                             children: [
@@ -132,6 +134,7 @@ export let original_data = {
                                         },
                                         {
                                             name: 'Code',
+                                            type: 'paax_code',
                                             children: [
                                                 {
                                                     name: 'PAA-X',

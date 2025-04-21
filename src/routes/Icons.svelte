@@ -10,10 +10,10 @@
 </script>
 
 <foreignObject
-	x="-8"
-	y="-8"
-	width="18"
-	height="18"
+	x="-10"
+	y="-10"
+	width="20"
+	height="20"
 	role="button"
 	tabindex="0"
 	aria-label="Icon"
@@ -28,8 +28,8 @@
 
 <style>
 	.icon {
-		width: 18px;
-		height: 18px;
+		width: 20px;
+		height: 20px;
 		background-size: cover;
 		border-radius: 4px;
 		transition: transform 0.2s ease;

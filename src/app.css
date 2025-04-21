@@ -1,7 +1,8 @@
-body,
-html {
-    margin: 0px;
-    padding: 0px;
-    background-color: #001C23;
-    font-family: "Montserrat";
+html, body {
+	margin: 0;
+	padding: 0;
+	height: 100%;
+	overflow: hidden; /* prevent vertical scroll */
+	background-color: #001C23;
+	font-family: "Montserrat";
 }

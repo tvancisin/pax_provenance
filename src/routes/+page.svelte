@@ -3,13 +3,21 @@
 	import Icons from './Icons.svelte';
 	import { original_data } from '$lib/utils';
 
-	let data = JSON.parse(JSON.stringify(original_data)); // deep clone
-
+	let data = JSON.parse(JSON.stringify(original_data));
+	let margin = 20;
 	let width,
 		height,
 		details_width = 1,
 		details_data = [],
 		clicked = null;
+
+	$: innerWidth = width * 0.7;
+	$: innerWidthPpl = width * 0.3;
+	$: innerHeight = height;
+	$: yCenter = innerHeight * 0.8;
+	$: upHeight = yCenter;
+	$: downHeight = innerHeight - upHeight;
+	$: xCenter = innerWidth / 2 - margin * 2;
 
 	// adding id's to each node
 	let idCounter = 0;
@@ -23,14 +31,6 @@
 	assignIds(data);
 	data.downward.forEach(assignIds);
 
-	// dimensions
-	let margin = 60;
-	$: innerWidth = width * 0.9;
-	$: innerHeight = height - 2 * margin;
-	$: yCenter = margin + innerHeight * 0.8;
-	$: upHeight = yCenter - margin;
-	$: downHeight = innerHeight - upHeight;
-	$: xCenter = innerWidth / 2;
 	$: time_line = d3
 		.scaleLinear()
 		.domain([0, 100])
@@ -41,8 +41,8 @@
 	let nodesDown = [],
 		linksDown = [];
 
-	$: upwardCluster = d3.cluster().size([innerWidth - margin, upHeight]);
-	$: downwardCluster = d3.cluster().size([innerWidth - margin, downHeight]);
+	$: upwardCluster = d3.cluster().size([innerWidth - 70, upHeight - 80]);
+	$: downwardCluster = d3.cluster().size([innerWidth - 70, downHeight]);
 
 	$: rootUp = d3.hierarchy(data, (d) => d.children);
 	$: rootDown = d3.hierarchy({ ...data, children: data.downward }, (d) => d.children);
@@ -86,7 +86,7 @@
 
 		rootDown.each((d) => {
 			if (d.data.name === 'conflict') {
-				d.y -= 30; // You can adjust this value to control vertical gap
+				d.y -= 40; // You can adjust this value to control vertical gap
 			}
 		});
 
@@ -126,7 +126,7 @@
 
 	function reset() {
 		// data = original_data
-		innerWidth = width * 0.9;
+		innerWidth = width * 0.7;
 		details_width = 1;
 		fullChain = [];
 		clicked = null;
@@ -172,7 +172,7 @@
 	let fullChain = [];
 	function handleClickEvents(e) {
 		if (clicked == null) {
-			innerWidth = innerWidth / 2;
+			innerWidth = width / 2;
 		}
 		clicked = true;
 		fullChain = [];
@@ -198,7 +198,6 @@
 		fullChain = fullChain.concat(downCurrentChain.reverse());
 	}
 
-	$: paaxNode = nodesUp.find((d) => d.data.name === 'PAA-X');
 	$: transNode = nodesUp.find((d) => d.data.choose === 'last');
 	$: trackerNode = nodesUp.find((d) => d.data.name === 'PA-X Tracker');
 
@@ -222,190 +221,219 @@
 		return `M${x1},${y1} C${cx1},${cy1} ${cx2},${cy2} ${x2},${y2}`;
 	};
 
-	let segment_height = 10;
+	let segment_height;
 	$: if (fullChain.length > 1) {
-		segment_height = height / fullChain.length;
+		const totalBorder = fullChain.length * 4;
+		segment_height = (height - totalBorder) / fullChain.length;
+	}
+
+	let numCircles = 800;
+	let circles = [];
+
+	$: console.log(innerWidthPpl);
+
+	$: if (innerWidthPpl) {
+		circles = [];
+
+		// Grid settings
+		let cols = Math.ceil(Math.sqrt(numCircles * (innerWidthPpl / innerHeight)));
+		let rows = Math.ceil(numCircles / cols);
+		let padding = 1;
+
+		// Circle radius based on available space
+		let cellWidth = (innerWidthPpl - padding * 2) / cols;
+		let cellHeight = (innerHeight - padding * 2) / rows;
+		let radius = Math.min(cellWidth, cellHeight) / 2 - 2;
+
+		// Generate circles in grid
+		for (let i = 0; i < numCircles; i++) {
+			let col = i % cols;
+			let row = Math.floor(i / cols);
+			let x = padding + col * cellWidth + cellWidth / 2 + Math.random() * 3;
+			let y = padding + row * cellHeight + cellHeight / 2 - Math.random() * 2;
+			circles.push({ x, y, r: radius });
+		}
 	}
 </script>
 
 <div id="wrapper" bind:clientWidth={width} bind:clientHeight={height}>
-	<button id="reset" on:click={reset}>reset</button>
-	<button id="filter" on:click={filter}>filter</button>
-	{#if width !== undefined || height !== undefined}
-		<svg {width} {height}>
-			<g transform={`translate(${0}, ${margin})`}>
-				<!-- ACLED and UCDP -->
-				<path
-					d={curvePath(transNode, trackerNode)}
-					fill="none"
-					stroke="gray"
-					stroke-opacity="0.4"
-					stroke-width="2"
-				/>
-				<g transform={`translate(${transNode.x}, ${transNode.y})`}>
-					<text x="15" y="-10" font-size="12" fill="gray">
-						{"Other data"}
-					</text>
-					<Icons which_icon={'img/other_data.png'} />
-				</g>
-				<!-- Upward Links -->
-				{#each linksUp as d}
-					<!-- <path
-						d={`M${d.x},${yCenter - d.y}
-					L${d.x},${yCenter - d.parent.y}
-					L${d.parent.x},${yCenter - d.parent.y}`}
-						fill="none"
-						stroke={d.children &&
-						['PAA-X', 'PA-X Gender', 'PA-X Local', 'Children & Youth'].includes(d.data.name)
-							? 'white'
-							: d.children
-								? 'gray'
-								: 'orange'}
-						stroke-width={d.data.name === 'PA-X' ||
-						d.data.name === 'Transcribe' ||
-						d.data.name === 'Code' ||
-						d.data.name === 'Translate'
-							? 10
-							: d.data.name === 'PAA-X'
-								? 3
-								: d.data.name === 'PA-X Gender'
-									? 3
-									: 3}
-					/> -->
+	<div class="tree">
+		<button id="reset" on:click={reset}>reset</button>
+		<!-- <button id="filter" on:click={filter}>filter</button> -->
+		{#if width !== undefined || height !== undefined}
+			<svg width={innerWidth} {height}>
+				<g transform={`translate(${0}, ${margin})`}>
+					<!-- ACLED and UCDP -->
 					<path
-						d={`M${d.x},${yCenter - d.y}
-						C${d.x},${yCenter - d.parent.y - 30}
-						${d.parent.x},${yCenter - d.parent.y - 70}
-						${d.parent.x},${yCenter - d.parent.y}`}
+						d={curvePath(transNode, trackerNode)}
 						fill="none"
-						stroke={highlightedLinks.has(`${d.parent.data.id}→${d.data.id}`)
-							? 'white'
-							: d.data.type === 'prog'
-								? '#4360AC'
-								: d.data.type === 'db'
-									? 'white'
-									: !d.children
-										? 'orange'
-										: 'gray'}
-						stroke-width={highlightedLinks.has(`${d.parent.data.id}→${d.data.id}`) ? '4' : '3'}
+						stroke="gray"
+						stroke-opacity="0.4"
+						stroke-width="2"
 					/>
-				{/each}
+					<g transform={`translate(${transNode.x}, ${transNode.y})`}>
+						<!-- <text x="15" y="-10" font-size="12" fill="gray">
+							{'Other data'}
+						</text> -->
+						<Icons which_icon={'img/other_data.png'} />
+					</g>
+					<!-- Upward Links -->
+					{#each linksUp as d}
+						<path
+							d={`M${d.x},${yCenter - d.y}
+						C${d.x},${yCenter - d.parent.y - 50}
+						${d.parent.x},${yCenter - d.parent.y - 80}
+						${d.parent.x},${yCenter - d.parent.y}`}
+							fill="none"
+							stroke={highlightedLinks.has(`${d.parent.data.id}→${d.data.id}`)
+								? 'orange'
+								: d.data.type === 'prog'
+									? 'steelblue'
+									: d.data.type === 'db'
+										? 'steelblue'
+										: !d.children
+											? 'steelblue'
+											: 'steelblue'}
+							stroke-width={highlightedLinks.has(`${d.parent.data.id}→${d.data.id}`)
+								? 5
+								: d.data.name === 'PA-X' ||
+									  d.data.name === 'Transcribe' ||
+									  d.data.type === 'first_code' ||
+									  d.data.name === 'Translate'
+									? 10
+									: d.data.name === 'PAA-X' ||
+										  d.data.name === 'PA-X Gender' ||
+										  d.data.type === 'paax_code'
+										? 5
+										: 2}
+						/>
+					{/each}
 
-				<!-- Downward Links -->
-				{#each linksDown as d}
-					<!-- <path
-						d={`M${d.x},${yCenter + d.y}
-					L${d.x},${yCenter + d.parent.y}
-					L${d.parent.x},${yCenter + d.parent.y}`}
-						fill="none"
-						stroke="steelblue"
-					/> -->
-
-					<path
-						d={`M${d.x},${yCenter + d.y}
+					<!-- Downward Links -->
+					{#each linksDown as d}
+					{console.log(d)}
+						<path
+							d={`M${d.x},${yCenter + d.y}
 						C${d.x},${yCenter + d.parent.y}
 						${d.parent.x},${yCenter + d.parent.y + 60}
 						${d.parent.x},${yCenter + d.parent.y}`}
-						fill="none"
-						stroke={highlightedLinks.has(`${d.parent.data.id}→${d.data.id}`) ? 'white' : 'gray'}
-						stroke-width="1"
-					/>
-				{/each}
+							fill="none"
+							stroke={highlightedLinks.has(`${d.parent.data.id}→${d.data.id}`)
+								? 'orange'
+								: d.data.name == 'conflict'
+									? 'red'
+									: 'white'}
+							stroke-width="1.5"
+						/>
+					{/each}
 
-				<!-- Upward Nodes -->
-				{#each nodesUp as d}
-					<g transform={`translate(${d.x}, ${yCenter - d.y})`}>
-						<text
-							x={d.children ? 15 : 5}
-							y={d.children ? 5 : -10}
-							font-size="12"
-							fill={d.children && d.data.type == 'db' ? 'gray' : d.children ? 'gray' : 'gray'}
-							transform={d.children ? 'rotate(0)' : 'rotate(-35)'}
-						>
-							{d.data.name}
-						</text>
-						{#if d.data.type === 'vis'}
-							<Icons
-								{d}
-								which_icon="img/vis.png"
-								on:hover={handleHoverEvent}
-								on:click={handleClickEvents}
-							/>
-						{:else if d.data.type == 'db'}
-							<Icons
-								{d}
-								which_icon="img/data.png"
-								on:hover={handleHoverEvent}
-								on:click={handleClickEvents}
-							/>
-						{:else if d.data.type == 'prog'}
-							<Icons
-								{d}
-								which_icon="img/prog.png"
-								on:hover={handleHoverEvent}
-								on:click={handleClickEvents}
-							/>
-						{:else if d.data.name == 'Collect'}
-							<Icons
-								{d}
-								which_icon="img/collect.png"
-								on:hover={handleHoverEvent}
-								on:click={handleClickEvents}
-							/>
-						{:else if d.data.name == 'Translate'}
-							<Icons
-								{d}
-								which_icon="img/translate.png"
-								on:hover={handleHoverEvent}
-								on:click={handleClickEvents}
-							/>
-						{:else if d.data.name == 'Transcribe'}
-							<Icons
-								{d}
-								which_icon="img/transcribe.png"
-								on:hover={handleHoverEvent}
-								on:click={handleClickEvents}
-							/>
-						{:else if d.data.name == 'Code'}
-							<Icons
-								{d}
-								which_icon="img/annotation.png"
-								on:hover={handleHoverEvent}
-								on:click={handleClickEvents}
-							/>
-						{:else}
-							<circle r="5" fill="gray" />
-						{/if}
+					<!-- Upward Nodes -->
+					{#each nodesUp as d}
+						<g transform={`translate(${d.x}, ${yCenter - d.y})`}>
+							<text
+								x={d.children ? 15 : 5}
+								y={d.children ? 5 : -10}
+								font-size="12"
+								fill={d.children && d.data.type == 'db' ? 'gray' : d.children ? 'gray' : 'gray'}
+								transform={d.children ? 'rotate(0)' : 'rotate(-35)'}
+							>
+								{d.data.name}
+							</text>
+							{#if d.data.type === 'vis'}
+								<Icons
+									{d}
+									which_icon="img/vis.png"
+									on:hover={handleHoverEvent}
+									on:click={handleClickEvents}
+								/>
+							{:else if d.data.type == 'db'}
+								<Icons
+									{d}
+									which_icon="img/data.png"
+									on:hover={handleHoverEvent}
+									on:click={handleClickEvents}
+								/>
+							{:else if d.data.type == 'prog'}
+								<Icons
+									{d}
+									which_icon="img/prog.png"
+									on:hover={handleHoverEvent}
+									on:click={handleClickEvents}
+								/>
+							{:else if d.data.name == 'Collect'}
+								<Icons
+									{d}
+									which_icon="img/collect.png"
+									on:hover={handleHoverEvent}
+									on:click={handleClickEvents}
+								/>
+							{:else if d.data.name == 'Translate'}
+								<Icons
+									{d}
+									which_icon="img/translate.png"
+									on:hover={handleHoverEvent}
+									on:click={handleClickEvents}
+								/>
+							{:else if d.data.name == 'Transcribe'}
+								<Icons
+									{d}
+									which_icon="img/transcribe.png"
+									on:hover={handleHoverEvent}
+									on:click={handleClickEvents}
+								/>
+							{:else if d.data.name == 'Code'}
+								<Icons
+									{d}
+									which_icon="img/annotation.png"
+									on:hover={handleHoverEvent}
+									on:click={handleClickEvents}
+								/>
+							{:else}
+								<circle r="5" fill="gray" />
+							{/if}
+						</g>
+					{/each}
+
+					<!-- Downward Nodes -->
+					{#each nodesDown as d}
+						<g transform={`translate(${d.x}, ${yCenter + d.y})`}>
+							{#if d.data.name == 'conflict'}
+								<Icons {d} which_icon={'img/war.png'} />
+								<!-- <text x="13" y="5" font-size="12" fill="gray"> {'war'}</text> -->
+							{:else}
+								<Icons {d} which_icon={'img/agt.png'} />
+								<!-- <text x="13" y="5" font-size="12" fill="gray"> {'agt'}</text> -->
+							{/if}
+						</g>
+					{/each}
+				</g>
+			</svg>
+		{/if}
+	</div>
+	<div class="overview">
+		<div class="ppl">
+			{#if innerWidthPpl}
+				<svg width={innerWidthPpl} {height}>
+					<g transform={`translate(${-5}, ${-5})`}>
+						{#each circles as d, i}
+							<!-- <circle cx={d.x} cy={d.y} r={d.r} fill="#4FD1C5" /> -->
+							<foreignObject x={d.x} y={d.y} width="12" height="12" aria-label="Icon">
+								<div
+									class="icon"
+									style={i < 100
+										? `background-image: url('img/peacerep_person.png');`
+										: i < 300
+											? `background-image: url('img/peace_person.png');`
+											: `background-image: url('img/war_person.png');`}
+								/>
+							</foreignObject>
+						{/each}
 					</g>
-				{/each}
-
-				<!-- Downward Nodes -->
-				{#each nodesDown as d}
-					<g transform={`translate(${d.x}, ${yCenter + d.y})`}>
-						{#if d.data.name == 'conflict'}
-							<Icons {d} which_icon={'img/war.png'} />
-							<text x="13" y="5" font-size="12" fill="gray"> {'war'}</text>
-						{:else}
-							<Icons {d} which_icon={'img/agt.png'} />
-							<text x="13" y="5" font-size="12" fill="gray"> {'agt'}</text>
-						{/if}
-					</g>
-				{/each}
-
-				<!-- <path
-					id="example"
-					d={`M ${xScale(agt_path_year)},${innerHeight - 10} 
-				C ${xScale(agt_path_year)},${innerHeight - 100} 
-				  ${imageX - margin.left},${lineEnd + 100} 
-				  ${imageX - margin.left},${lineEnd}`}
-					fill="none"
-					stroke="white"
-					stroke-width="1"
-					opacity="0"
-				/> -->
-			</g>
-		</svg>
-	{/if}
+				</svg>
+			{/if}
+		</div>
+		<!-- <div class="time"></div> -->
+	</div>
 	<div id="details" style="margin-top: {0 + 'px'};">
 		{#each fullChain as d}
 			<a href={d.data.link} target="_blank">
@@ -421,7 +449,6 @@
 						class="segment-left"
 						style="flex: 1; border-right: 1px solid rgba(128, 128, 128, 0.333);"
 					>
-						<!-- <p>{d.data.name}</p> -->
 						<svg width="100%" height="100%" preserveAspectRatio="none">
 							<g transform={`translate(16, ${segment_height / 2})`}>
 								<text x="15" y="-15" font-size="12" fill="white">{d.data.name}</text>
@@ -430,8 +457,8 @@
 									y1="-32"
 									x2="1"
 									y2={segment_height - 24}
-									stroke="white"
-									stroke-width="2"
+									stroke="orange"
+									stroke-width="3"
 								/>
 								{#if d.data.type === 'vis'}
 									<Icons {d} which_icon="img/vis.png" />
@@ -517,47 +544,55 @@
 	#wrapper {
 		width: 100%;
 		height: 100vh;
+		display: flex;
+	}
+	.tree {
+		width: 70%;
+		height: 100vh;
+	}
+	.overview {
+		width: 30%;
+		display: flex;
+		flex-direction: column;
+	}
+	.ppl {
+		width: 100%;
+		height: 100%;
+		/* background-color: red; */
 	}
 	#details {
 		position: absolute;
-		top: 0;
+		top: 4px;
 		right: 0;
-		margin: 10px;
 	}
 	.detail-segment {
 		color: white;
 		display: flex;
-		background-color: #001c23;
+		background-color: #1f1f1f;
 		border-radius: 10px;
-		border: solid 2px rgba(128, 128, 128, 0.1);
+		border: solid 2px rgba(106, 106, 106, 0.237);
 		transition: border-color 0.2s ease;
 	}
-
 	.detail-segment:hover {
 		border-color: rgba(255, 255, 255, 0.8); /* brighter border */
 	}
-
 	.segment-left,
 	.segment-right {
 		flex: 1;
 		padding: 0;
 		box-sizing: border-box;
 	}
-
 	.segment-right {
 		border-radius: 10px;
 	}
-
 	button {
 		width: 50px;
 	}
-
 	#reset {
 		position: absolute;
 		top: 0px;
 		left: 0px;
 	}
-
 	#filter {
 		position: absolute;
 		top: 25px;
@@ -569,10 +604,10 @@
 		border: none;
 	}
 	.icon {
-		width: 10px;
-		height: 10px;
+		width: 12px;
+		height: 12px;
 		background-size: cover;
-		border-radius: 4px;
+		border-radius: 0px;
 		transition: transform 0.2s ease;
 	}
 </style>
