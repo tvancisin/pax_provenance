@@ -131,6 +131,7 @@
 		fullChain = [];
 		clicked = null;
 		highlightedLinks = new Set();
+		d3.selectAll('.ind_line').style('opacity', 0.5);
 	}
 
 	function filter() {
@@ -171,6 +172,7 @@
 	// click
 	let fullChain = [];
 	function handleClickEvents(e) {
+		d3.selectAll('.ind_line').style('opacity', 0);
 		if (clicked == null) {
 			innerWidth = width / 2;
 		}
@@ -197,6 +199,7 @@
 		// Push the downCurrent chain in reverse order
 		fullChain = fullChain.concat(downCurrentChain.reverse());
 	}
+	
 
 	$: transNode = nodesUp.find((d) => d.data.choose === 'last');
 	$: trackerNode = nodesUp.find((d) => d.data.name === 'PA-X Tracker');
@@ -206,7 +209,7 @@
 		const y1 = node_one.y;
 
 		const x2 = node_two.x;
-		const y2 = innerHeight - margin - node_two.y;
+		const y2 = innerHeight - 2 * margin - node_two.y;
 
 		const dx = x2 - x1;
 		const dy = y2 - y1;
@@ -227,33 +230,7 @@
 		segment_height = (height - totalBorder) / fullChain.length;
 	}
 
-	let numCircles = 800;
-	let circles = [];
-
-	$: console.log(innerWidthPpl);
-
-	$: if (innerWidthPpl) {
-		circles = [];
-
-		// Grid settings
-		let cols = Math.ceil(Math.sqrt(numCircles * (innerWidthPpl / innerHeight)));
-		let rows = Math.ceil(numCircles / cols);
-		let padding = 1;
-
-		// Circle radius based on available space
-		let cellWidth = (innerWidthPpl - padding * 2) / cols;
-		let cellHeight = (innerHeight - padding * 2) / rows;
-		let radius = Math.min(cellWidth, cellHeight) / 2 - 2;
-
-		// Generate circles in grid
-		for (let i = 0; i < numCircles; i++) {
-			let col = i % cols;
-			let row = Math.floor(i / cols);
-			let x = padding + col * cellWidth + cellWidth / 2 + Math.random() * 3;
-			let y = padding + row * cellHeight + cellHeight / 2 - Math.random() * 2;
-			circles.push({ x, y, r: radius });
-		}
-	}
+	$: agtNode = nodesDown.find((d) => d.data.name === 'agt');
 </script>
 
 <div id="wrapper" bind:clientWidth={width} bind:clientHeight={height}>
@@ -263,6 +240,31 @@
 		{#if width !== undefined || height !== undefined}
 			<svg width={innerWidth} {height}>
 				<g transform={`translate(${0}, ${margin})`}>
+					<g transform={`translate(${0}, ${0})`}>
+						<line
+							class="ind_line"
+							x1="5"
+							x2={innerWidth + 5}
+							y1={yCenter + 12}
+							y2={yCenter + 12}
+							stroke="gray"
+							stroke-opacity="0.5"
+							stroke-width="1"
+							stroke-dasharray="10,2"
+						/>
+
+						<line
+							class="ind_line"
+							x1="5"
+							x2={innerWidth + 5}
+							y1={innerHeight - agtNode.y + 12}
+							y2={innerHeight - agtNode.y + 12}
+							stroke="gray"
+							stroke-opacity="0.5"
+							stroke-width="1"
+							stroke-dasharray="10,2"
+						/>
+					</g>
 					<!-- ACLED and UCDP -->
 					<path
 						d={curvePath(transNode, trackerNode)}
@@ -288,12 +290,12 @@
 							stroke={highlightedLinks.has(`${d.parent.data.id}→${d.data.id}`)
 								? 'orange'
 								: d.data.type === 'prog'
-									? 'steelblue'
+									? '#595959'
 									: d.data.type === 'db'
-										? 'steelblue'
+										? '#595959'
 										: !d.children
-											? 'steelblue'
-											: 'steelblue'}
+											? '#595959'
+											: '#595959'}
 							stroke-width={highlightedLinks.has(`${d.parent.data.id}→${d.data.id}`)
 								? 5
 								: d.data.name === 'PA-X' ||
@@ -311,7 +313,6 @@
 
 					<!-- Downward Links -->
 					{#each linksDown as d}
-					{console.log(d)}
 						<path
 							d={`M${d.x},${yCenter + d.y}
 						C${d.x},${yCenter + d.parent.y}
@@ -321,9 +322,9 @@
 							stroke={highlightedLinks.has(`${d.parent.data.id}→${d.data.id}`)
 								? 'orange'
 								: d.data.name == 'conflict'
-									? 'red'
-									: 'white'}
-							stroke-width="1.5"
+									? '#595959'
+									: '#595959'}
+							stroke-width="1"
 						/>
 					{/each}
 
@@ -414,20 +415,35 @@
 		<div class="ppl">
 			{#if innerWidthPpl}
 				<svg width={innerWidthPpl} {height}>
-					<g transform={`translate(${-5}, ${-5})`}>
-						{#each circles as d, i}
-							<!-- <circle cx={d.x} cy={d.y} r={d.r} fill="#4FD1C5" /> -->
-							<foreignObject x={d.x} y={d.y} width="12" height="12" aria-label="Icon">
-								<div
-									class="icon"
-									style={i < 100
-										? `background-image: url('img/peacerep_person.png');`
-										: i < 300
-											? `background-image: url('img/peace_person.png');`
-											: `background-image: url('img/war_person.png');`}
-								/>
-							</foreignObject>
-						{/each}
+					<g transform={`translate(${0}, ${margin})`}>
+						<text x="5" y={yCenter + 5} fill="white">PeaceRep</text>
+						<text x="5" y={innerHeight - agtNode.y + 5} fill="white">Peace Agreements</text>
+						<text x="5" y={innerHeight - 30} fill="white">Conflict</text>
+						<line
+							class="ind_line"
+							x1="5"
+							x2={innerWidthPpl + 5}
+							y1={yCenter + 12}
+							y2={yCenter + 12}
+							stroke="gray"
+							stroke-opacity="0.5"
+							stroke-width="1"
+							stroke-dasharray="10,2"
+						/>
+
+						<line
+							class="ind_line"
+							x1="5"
+							x2={innerWidth + 5}
+							y1={innerHeight - agtNode.y + 12}
+							y2={innerHeight - agtNode.y + 12}
+							stroke="gray"
+							stroke-opacity="0.5"
+							stroke-width="1"
+							stroke-dasharray="10,2"
+						/>
+
+						<!-- <rect x="0" y="-20" {height} width="1" fill-opacity="0.5" fill="gray"></rect> -->
 					</g>
 				</svg>
 			{/if}
@@ -568,7 +584,7 @@
 	.detail-segment {
 		color: white;
 		display: flex;
-		background-color: #1f1f1f;
+		background-color: #002731;
 		border-radius: 10px;
 		border: solid 2px rgba(106, 106, 106, 0.237);
 		transition: border-color 0.2s ease;
