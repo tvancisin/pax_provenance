@@ -2,6 +2,9 @@
 	import * as d3 from 'd3';
 	import Icons from './Icons.svelte';
 	import { original_data } from '$lib/utils';
+	import { on } from 'svelte/events';
+	import { onMount } from 'svelte';
+	import { page } from '$app/state';
 
 	let data = JSON.parse(JSON.stringify(original_data));
 	let margin = 20;
@@ -30,6 +33,27 @@
 
 	assignIds(data);
 	data.downward.forEach(assignIds);
+
+	onMount(() => {
+		d3.json('/data/pax_docs_all.json').then((data) => {
+			let languages = d3.groups(data, (d) => {
+				return d.language.name;
+			});
+			console.log(languages);
+			let conflict = d3.groups(data, (d) => {
+				return d.ucdp_conflict_id;
+			});
+			console.log(conflict);
+
+			let page_count = 0;
+			data.forEach((d) => {
+				if (d.page_count !== null) {
+					page_count += d.page_count;
+				}
+			});
+			console.log(page_count);
+		});
+	});
 
 	$: time_line = d3
 		.scaleLinear()
@@ -199,7 +223,6 @@
 		// Push the downCurrent chain in reverse order
 		fullChain = fullChain.concat(downCurrentChain.reverse());
 	}
-	
 
 	$: transNode = nodesUp.find((d) => d.data.choose === 'last');
 	$: trackerNode = nodesUp.find((d) => d.data.name === 'PA-X Tracker');
@@ -274,9 +297,9 @@
 						stroke-width="2"
 					/>
 					<g transform={`translate(${transNode.x}, ${transNode.y})`}>
-						<!-- <text x="15" y="-10" font-size="12" fill="gray">
+						<text x="-80" y="-10" font-size="12" fill="gray">
 							{'Other data'}
-						</text> -->
+						</text>
 						<Icons which_icon={'img/other_data.png'} />
 					</g>
 					<!-- Upward Links -->
@@ -313,19 +336,21 @@
 
 					<!-- Downward Links -->
 					{#each linksDown as d}
-						<path
-							d={`M${d.x},${yCenter + d.y}
+						{#if d.data.type !== 'no'}
+							<path
+								d={`M${d.x},${yCenter + d.y}
 						C${d.x},${yCenter + d.parent.y}
 						${d.parent.x},${yCenter + d.parent.y + 60}
 						${d.parent.x},${yCenter + d.parent.y}`}
-							fill="none"
-							stroke={highlightedLinks.has(`${d.parent.data.id}→${d.data.id}`)
-								? 'orange'
-								: d.data.name == 'conflict'
-									? '#595959'
-									: '#595959'}
-							stroke-width="1"
-						/>
+								fill="none"
+								stroke={highlightedLinks.has(`${d.parent.data.id}→${d.data.id}`)
+									? 'orange'
+									: d.data.name == 'conflict'
+										? '#595959'
+										: '#595959'}
+								stroke-width="1"
+							/>
+						{/if}
 					{/each}
 
 					<!-- Upward Nodes -->
@@ -333,9 +358,9 @@
 						<g transform={`translate(${d.x}, ${yCenter - d.y})`}>
 							<text
 								x={d.children ? 15 : 5}
-								y={d.children ? 5 : -10}
+								y={d.children ? 5 : -13}
 								font-size="12"
-								fill={d.children && d.data.type == 'db' ? 'gray' : d.children ? 'gray' : 'gray'}
+								fill={d.children && d.data.type == 'db' ? 'white' : d.children ? 'white' : 'white'}
 								transform={d.children ? 'rotate(0)' : 'rotate(-35)'}
 							>
 								{d.data.name}
@@ -397,16 +422,25 @@
 
 					<!-- Downward Nodes -->
 					{#each nodesDown as d}
-						<g transform={`translate(${d.x}, ${yCenter + d.y})`}>
-							{#if d.data.name == 'conflict'}
-								<Icons {d} which_icon={'img/war.png'} />
-								<!-- <text x="13" y="5" font-size="12" fill="gray"> {'war'}</text> -->
-							{:else}
-								<Icons {d} which_icon={'img/agt.png'} />
-								<!-- <text x="13" y="5" font-size="12" fill="gray"> {'agt'}</text> -->
-							{/if}
-						</g>
-					{/each}
+					{#if d.data.type == 'no'}
+					  <g transform={`translate(${d.x}, ${yCenter + d.y + 8})`}>
+						{#if d.data.name == 'conflict'}
+						  <Icons {d} which_icon={'img/war.png'} />
+						{:else}
+						  <Icons {d} which_icon={'img/agt.png'} />
+						{/if}
+					  </g>
+					{:else}
+					  <g transform={`translate(${d.x}, ${yCenter + d.y})`}>
+						{#if d.data.name == 'conflict'}
+						  <Icons {d} which_icon={'img/war.png'} />
+						{:else}
+						  <Icons {d} which_icon={'img/agt.png'} />
+						{/if}
+					  </g>
+					{/if}
+				  {/each}
+				  
 				</g>
 			</svg>
 		{/if}
@@ -416,9 +450,24 @@
 			{#if innerWidthPpl}
 				<svg width={innerWidthPpl} {height}>
 					<g transform={`translate(${0}, ${margin})`}>
+						<text x="30" y={20} fill="white">libraries? no. of lines?</text>
+						<text x="30" y={50} fill="white">? additional categories in gender, local...</text>
+						<text x="30" y={80} fill="white">? coded pages in gender, local...</text>
+						<text x="30" y={110} fill="white">250+ categories in pax</text>
+						<text x="30" y={140} fill="white">14,067 Pages Coded</text>
+						<text x="30" y={170} fill="white">? Transcribed Agreements</text>
+						<text x="30" y={200} fill="white">571 Translated Agreements</text>
+						<text x="30" y={230} fill="white">2144 Peace Agreements Collected</text>
+						<text x="30" y={260} fill="white">? all peace agreements</text>
+						<text x="30" y={290} fill="white">117 Conflicts</text>
+						<text x="30" y={320} fill="white">? all Conflicts</text>
 						<text x="5" y={yCenter + 5} fill="white">PeaceRep</text>
 						<text x="5" y={innerHeight - agtNode.y + 5} fill="white">Peace Agreements</text>
 						<text x="5" y={innerHeight - 30} fill="white">Conflict</text>
+
+						<!-- <text x="30" y={20} fill="white">34 PA-X Citations</text>
+						<text x="30" y={50} fill="white">14 PeaceTech Tools</text>
+						<text x="30" y={80} fill="white">5 Databases</text> -->
 						<line
 							class="ind_line"
 							x1="5"
@@ -499,10 +548,10 @@
 								{/if}
 								{#each Array(d.data.ppl) as _, j}
 									<foreignObject
-										x={20 + j * 10}
+										x={20 + j * 12}
 										y={-8 + Math.random()}
-										width="10"
-										height="10"
+										width="12"
+										height="12"
 										role="button"
 										tabindex="0"
 										aria-label="Icon"
@@ -512,10 +561,10 @@
 								{/each}
 								<line
 									x1="20"
-									y1="10"
+									y1="15"
 									x2={20 + time_line(d.data.time)}
-									y2="10"
-									stroke="gray"
+									y2="15"
+									stroke="white"
 									stroke-width="1"
 								/>
 							</g>

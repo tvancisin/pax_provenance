@@ -10,10 +10,10 @@
 </script>
 
 <foreignObject
-	x="-10"
-	y="-10"
-	width="20"
-	height="20"
+	x="-12"
+	y="-12"
+	width="24"
+	height="24"
 	role="button"
 	tabindex="0"
 	aria-label="Icon"
@@ -28,15 +28,15 @@
 
 <style>
 	.icon {
-		width: 20px;
-		height: 20px;
+		width: 24px;
+		height: 24px;
 		background-size: cover;
 		border-radius: 4px;
 		transition: transform 0.2s ease;
 	}
 
 	foreignObject:hover .icon {
-		transform: scale(3);
+		transform: scale(2);
 	}
 	foreignObject {
 		overflow: visible;

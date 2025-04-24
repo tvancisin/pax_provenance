@@ -175,6 +175,7 @@ export let original_data = {
         }
     ],
     downward: [
+        { name: 'agt', type: 'no', children: [{ name: 'conflict', type: "no" }] },
         { name: 'agt', children: [{ name: 'conflict' }] },
         { name: 'agt', children: [{ name: 'conflict' }] },
         { name: 'agt', children: [{ name: 'conflict' }] },
@@ -183,8 +184,7 @@ export let original_data = {
         { name: 'agt', children: [{ name: 'conflict' }] },
         { name: 'agt', children: [{ name: 'conflict' }] },
         { name: 'agt', children: [{ name: 'conflict' }] },
-        { name: 'agt', children: [{ name: 'conflict' }] },
-        { name: 'agt', children: [{ name: 'conflict' }] },
+        { name: 'agt', type: 'no', children: [{ name: 'conflict', type: "no" }] },
         { name: 'agt', children: [{ name: 'conflict' }] },
         { name: 'agt', children: [{ name: 'conflict' }] },
         { name: 'agt', children: [{ name: 'conflict' }] },
